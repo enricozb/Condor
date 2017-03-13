@@ -1,6 +1,8 @@
 import sys
 import condor.glutils as glutils
-from condor.style import Style
+import condor.style
+
+from condor.style import *
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
@@ -9,6 +11,7 @@ class Condor:
     def __init__(self):
         self.looping = True
         self.style = Style()
+        glutils.set_style(self.style)
 
     # ----- hidden functions -----
 
@@ -48,51 +51,64 @@ class Condor:
 
     # ----- style -----
 
-    def fill(self, r, g, b):
-        self.style.set_fill(r, g, b)
+    def fill(self, r, g=None, b=None):
+        self.style.set_fill(color(r, g, b))
 
     def no_fill(self):
         self.style.no_fill()
 
-    def stroke(self, r, g, b):
-        if {type(r), type(g), type(g)}.difference({float, int}):
-            raise TypeError('stroke() arguments must be integers or floats')
-        self.style.set_stroke(r, g, b)
+    def stroke(self, r, g=None, b=None):
+        self.style.set_stroke(color(r, g, b))
 
     def no_stroke(self):
         self.style.no_stroke()
 
     def stroke_weight(self, w):
         if type(w) not in (int, float):
-            raise TypeError('stroke_weight() weight must be integer of float')
+            raise TypeError('stroke_weight() weight must be integer or float')
 
         if w <= 0:
             raise ValueError('stroke_weight() weight must be positive')
 
         self.style.set_stroke_weight(w)
 
-    def background(self, r, g, b):
-        if {type(r), type(g), type(g)}.difference({float, int}):
-            raise TypeError('background() arguments must be integers or floats')
-        glutils.clear_color((r, g, b))
+    def rect_mode(self, mode):
+        if mode not in (CORNER, CORNERS, CENTER, RADIUS):
+            raise ValueError('rect_mode() must be a valid rect_mode')
+        self.style.set_rect_mode(mode)
+
+    def background(self, r, g=None, b=None):
+        glutils.clear_color(color(r, g, b))
 
     # ----- shapes -----
 
     def rect(self, x, y, w, h):
+        if {type(i) for i in (x, y, w, h)} != {int, float}:
+            raise TypeError('rect() arguments must be integers or floats')
+
+        if w < 0 or h < 0:
+            raise ValueError('rect() width and height must be positive')
+
         if self.style.fill:
             self.style.re_fill()
             glutils.rect_fill(x, y, w, h)
         if self.style.stroke:
             self.style.re_stroke()
-            glutils.rect_stroke(x, y, w, h, self.style.stroke_weight)
+            glutils.rect_stroke(x, y, w, h)
 
     def ellipse(self, x, y, a, b):
+        if {type(i) for i in (x, y, a, b)} != {int, float}:
+            raise TypeError('ellipse() arguments must be integers or floats')
+
+        if a < 0 or b < 0:
+            raise ValueError('ellipse() arguments a and b must be positive')
+
         if self.style.fill:
             self.style.re_fill()
             glutils.ellipse_fill(x, y, a, b)
         if self.style.stroke:
             self.style.re_stroke()
-            glutils.ellipse_stroke(x, y, a, b, self.style.stroke_weight)
+            glutils.ellipse_stroke(x, y, a, b)
 
     def begin(self, setup, draw):
         if not (callable(setup) and callable(draw)):
@@ -105,6 +121,7 @@ class Condor:
         glutils.callback(self._loop)
 
 __all__ = list(filter(lambda x: not x.startswith('_'), Condor.__dict__))
+__all__ += condor.style.__all__
 
 # Expose functions:
 c = Condor()

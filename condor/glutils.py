@@ -2,11 +2,13 @@
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
+from condor.style import *
 
 from math import pi, sin, cos
 
 # TODO - move to style.py and make configurable
-detail = 80
+detail = 40
+style = None
 
 def init_window(title, width, height):
     ''' Creates window with title and width, height '''
@@ -19,11 +21,15 @@ def init_window(title, width, height):
     if type(title) is not str:
         raise TypeError('init_window() title argument must be string')
 
-    # TODO - Variable DisplayModes
+    # TODO - Variable display modes
     glutInit()
     glutInitDisplayMode(GLUT_RGBA | GLUT_ALPHA | GLUT_DEPTH)
     glutInitWindowSize(width, height)
     glutCreateWindow(bytes(title, 'utf-8'))
+
+def set_style(new_style):
+    global style
+    style = new_style
 
 def callback(loop):
     glutDisplayFunc(loop)
@@ -47,7 +53,29 @@ def clear_color(color):
     glClearColor(*color, 1)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
+def rect_mode_convert(x, y, w, h):
+    if style.rect_mode == CORNERS:
+        if w <= x or h <= y:
+            raise ValueError('For rect_mode CORNERS, first point must be' +
+                'below and left of second point.')
+        w -= x
+        h -= x
+    elif style.rect_mode == CENTER:
+        x -= w/2
+        y -= h/2
+    elif style.rect_mode == RADIUS:
+        x -= w
+        y -= h
+        w *= 2
+        h *= 2
+    elif style.rect_mode != CORNER:
+        raise ValueError(
+            'glutils.style.rect_mode = {}, which is invalid'.format(
+                style.rect_mode))
+    return x, y, w, h
+
 def rect_fill(x, y, w, h):
+    x, y, w, h = rect_mode_convert(x, y, w, h)
     glBegin(GL_QUADS)
     glVertex2f(x, y)
     glVertex2f(x + w, y)
@@ -55,8 +83,11 @@ def rect_fill(x, y, w, h):
     glVertex2f(x, y + h)
     glEnd()
 
-def rect_stroke(x, y, w, h, lw):
-    lw = lw // 2
+def rect_stroke(x, y, w, h):
+    # TODO - change to ellipse_stroke algorithm
+    x, y, w, h = rect_mode_convert(x, y, w, h)
+    lw = style.stroke_weight / 2
+
     glBegin(GL_LINES)
     glVertex2f(x - lw, y)
     glVertex2f(x + w + lw, y)
@@ -77,7 +108,8 @@ def ellipse_fill(x, y, a, b):
         glVertex2f(a * cos(theta) + x, b * sin(theta) + y)
     glEnd()
 
-def ellipse_stroke(x, y, a, b, w):
+def ellipse_stroke(x, y, a, b):
+    w  = style.stroke_weight / 2
     o_a, o_b = a + w, b + w
     i_a, i_b = a - w, b - w
     glBegin(GL_TRIANGLE_STRIP)
