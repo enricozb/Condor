@@ -59,7 +59,7 @@ def rect_mode_convert(x, y, w, h):
             raise ValueError('For rect_mode CORNERS, first point must be' +
                 'below and left of second point.')
         w -= x
-        h -= x
+        h -= y
     elif style.rect_mode == CENTER:
         x -= w/2
         y -= h/2
