@@ -6,7 +6,7 @@ from condor.style import *
 
 from math import pi, sin, cos
 
-# TODO - move to style.py and make configurable
+# TODO - move detail to style.py and make configurable
 detail = 40
 style = None
 
@@ -54,21 +54,21 @@ def clear_color(color):
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
 def rect_mode_convert(x, y, w, h):
-    if style.rect_mode == CORNERS:
+    if style.rect_mode == 'corners':
         if w <= x or h <= y:
-            raise ValueError('For rect_mode CORNERS, first point must be' +
+            raise ValueError('For rect_mode "corners", first point must be' +
                 'below and left of second point.')
         w -= x
         h -= y
-    elif style.rect_mode == CENTER:
+    elif style.rect_mode == 'center':
         x -= w/2
         y -= h/2
-    elif style.rect_mode == RADIUS:
+    elif style.rect_mode == 'radius':
         x -= w
         y -= h
         w *= 2
         h *= 2
-    elif style.rect_mode != CORNER:
+    elif style.rect_mode != 'corner':
         raise ValueError(
             'glutils.style.rect_mode = {}, which is invalid'.format(
                 style.rect_mode))

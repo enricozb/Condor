@@ -1,3 +1,6 @@
+# Will be tracked when a stable build exists
+example.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

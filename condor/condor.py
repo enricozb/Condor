@@ -20,6 +20,7 @@ class Condor:
             self._before_draw()
             self.draw()
             glutSwapBuffers()
+        glutReshapeWindow(self.width, self.height);
 
     def _before_draw(self):
         self._prepare_2d(self.width, self.height)
@@ -52,13 +53,13 @@ class Condor:
     # ----- style -----
 
     def fill(self, r, g=None, b=None):
-        self.style.set_fill(color(r, g, b))
+        self.style.set_fill((r, g, b))
 
     def no_fill(self):
         self.style.no_fill()
 
     def stroke(self, r, g=None, b=None):
-        self.style.set_stroke(color(r, g, b))
+        self.style.set_stroke((r, g, b))
 
     def no_stroke(self):
         self.style.no_stroke()
@@ -73,12 +74,17 @@ class Condor:
         self.style.set_stroke_weight(w)
 
     def rect_mode(self, mode):
-        if mode not in (CORNER, CORNERS, CENTER, RADIUS):
-            raise ValueError('rect_mode() must be a valid rect_mode')
+        if mode not in ('corner', 'corners', 'center', 'radius'):
+            raise ValueError('rect_mode() called with invalid rect mode')
         self.style.set_rect_mode(mode)
 
+    def color_mode(self, mode):
+        if mode not in condor.style.color_modes:
+            raise ValueError('color_mode() called with invalid color mode')
+        self.style.set_color_mode(mode)
+
     def background(self, r, g=None, b=None):
-        glutils.clear_color(color(r, g, b))
+        glutils.clear_color(self.style.color(r, g, b))
 
     # ----- shapes -----
 
