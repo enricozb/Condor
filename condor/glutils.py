@@ -3,11 +3,12 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from condor.style import *
+from condor.profiler import timing
 
 from math import pi, sin, cos
 
 # TODO - move detail to style.py and make configurable
-detail = 40
+detail = 20
 style = None
 
 def init_window(title, width, height):
@@ -66,8 +67,8 @@ def rect_mode_convert(x, y, w, h):
     elif style.rect_mode == 'radius':
         x -= w
         y -= h
-        w *= 2
-        h *= 2
+        w <<= 2
+        h <<= 2
     elif style.rect_mode != 'corner':
         raise ValueError(
             'glutils.style.rect_mode = {}, which is invalid'.format(
@@ -76,12 +77,7 @@ def rect_mode_convert(x, y, w, h):
 
 def rect_fill(x, y, w, h):
     x, y, w, h = rect_mode_convert(x, y, w, h)
-    glBegin(GL_QUADS)
-    glVertex2f(x, y)
-    glVertex2f(x + w, y)
-    glVertex2f(x + w, y + h)
-    glVertex2f(x, y + h)
-    glEnd()
+    glRectf(x, y, x + w, y + h)
 
 def rect_stroke(x, y, w, h):
     # TODO - change to ellipse_stroke algorithm

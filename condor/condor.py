@@ -1,8 +1,9 @@
-import sys
 import condor.glutils as glutils
 import condor.style
-
 from condor.style import *
+
+import noise as noise_module
+
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
@@ -11,19 +12,20 @@ class Condor:
     def __init__(self):
         self.looping = True
         self.style = Style()
+        self._frame_count = 0
         glutils.set_style(self.style)
 
     # ----- hidden functions -----
-
     def _loop(self):
         if self.looping:
             self._before_draw()
             self.draw()
             glutSwapBuffers()
-        glutReshapeWindow(self.width, self.height);
+            self._frame_count += 1
+        glutReshapeWindow(self._width, self._height)
 
     def _before_draw(self):
-        self._prepare_2d(self.width, self.height)
+        self._prepare_2d(self._width, self._height)
         self._refresh_style()
 
     def _prepare_2d(self, width, height):
@@ -32,17 +34,26 @@ class Condor:
     def _refresh_style(self):
         self.style.refresh()
 
-    # ----- exposed functions -----
+    # ----- properties -----
+    def frame_count(self):
+        return self._frame_count
 
+    def width(self):
+        return self._width
+
+    def height(self):
+        return self._height
+
+    # ----- exposed functions -----
     def size(self, width, height):
         if {type(width), type(height)} != {int}:
             raise TypeError('size() arguments must be integers.')
         if width <= 1 or height <= 1:
             raise ValueError('size() width and height must be positive.')
 
-        self.width = width
-        self.height = height
-        glutils.init_window('condor', width, height)
+        self._width = width
+        self._height = height
+        glutils.init_window('condor', self._width, self._height)
 
     def no_loop(self):
         self.looping = False
@@ -51,7 +62,6 @@ class Condor:
         self.looping = True
 
     # ----- style -----
-
     def fill(self, r, g=None, b=None):
         self.style.set_fill((r, g, b))
 
@@ -87,9 +97,8 @@ class Condor:
         glutils.clear_color(self.style.color(r, g, b))
 
     # ----- shapes -----
-
     def rect(self, x, y, w, h):
-        if {type(i) for i in (x, y, w, h)} != {int, float}:
+        if not set(map(type, (x, y, w, h))) <= {int, float}:
             raise TypeError('rect() arguments must be integers or floats')
 
         if w < 0 or h < 0:
@@ -103,7 +112,7 @@ class Condor:
             glutils.rect_stroke(x, y, w, h)
 
     def ellipse(self, x, y, a, b):
-        if {type(i) for i in (x, y, a, b)} != {int, float}:
+        if not {type(i) for i in (x, y, a, b)} <= {int, float}:
             raise TypeError('ellipse() arguments must be integers or floats')
 
         if a < 0 or b < 0:
@@ -126,8 +135,15 @@ class Condor:
         glutSwapBuffers()
         glutils.callback(self._loop)
 
+    # ----- random -----
+    def noise(self, *args):
+        if not set(map(type, args)) <= {int, float}:
+            raise TypeError('noise() arguments must be integers or floats')
+        if 1 <= len(args) <= 4:
+            return getattr(noise_module, 'pnoise{}'.format(len(args)))(*args)
+        raise ValueError('noise() must have one to four arguments')
+
 __all__ = list(filter(lambda x: not x.startswith('_'), Condor.__dict__))
-__all__ += condor.style.__all__
 
 # Expose functions:
 c = Condor()

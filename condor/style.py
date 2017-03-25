@@ -9,8 +9,6 @@ color_modes = 'rgb', 'hsv'
 
 __all__ = ['Style']
 
-
-
 class Style:
     def __init__(self):
         ''' Sets up the default style values '''
@@ -18,7 +16,7 @@ class Style:
         self.stroke = (0, 0, 0)
         self.stroke_weight = 1
 
-        self.rect_mode = 'corners'
+        self.rect_mode = 'corner'
         self.elli_mode = 'center'
 
         self.color_mode = 'rgb'
