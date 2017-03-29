@@ -60,12 +60,6 @@ class Condor:
     def height(self):
         return self._height
 
-    def mouse_x(self):
-        return self.events.mouse_x
-
-    def mouse_y(self):
-        return self.events.mouse_y
-
     # ----- exposed functions -----
     def size(self, width, height):
         self._width = width
@@ -160,6 +154,16 @@ class Condor:
             v = getattr(noise_module, 'pnoise{}'.format(len(args)))(*args)
             return (v + 1) / 2
         raise ValueError('noise() must have one to four arguments')
+
+    # ----- events -----
+    def recent_key(self):
+        return self.events.key
+
+    def mouse_x(self):
+        return self.events.mouse_x
+
+    def mouse_y(self):
+        return self.events.mouse_y
 
 # Expose functions:
 c = Condor()
