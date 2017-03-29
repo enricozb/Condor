@@ -1,4 +1,7 @@
 ''' Thicker wrapper around Python OpenGL bindings '''
+
+# TODO - eventually remove this file
+
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
