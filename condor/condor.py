@@ -107,12 +107,7 @@ class Condor:
         Arguments must be floats or integers.
         '''
 
-        if self.style.fill:
-            self.style.re_fill()
-            glutils.rect_fill(a, b, c, d)
-        if self.style.stroke:
-            self.style.re_stroke()
-            glutils.rect_stroke(a, b, c, d)
+        glutils.rect(a, b, c, d)
 
     def ellipse(self, x, y, a, b):
         '''
@@ -120,13 +115,9 @@ class Condor:
         Arguments must be floats or integers.
         '''
 
-        if self.style.fill:
-            self.style.re_fill()
-            glutils.ellipse_fill(x, y, a, b)
-        if self.style.stroke:
-            self.style.re_stroke()
-            glutils.ellipse_stroke(x, y, a, b)
+        glutils.ellipse(x, y, a, b)
 
+    # ----- entry point -----
     def begin(self, *funcs):
         '''
         Sets up all function calls, using the file that called begin() as
@@ -147,13 +138,10 @@ class Condor:
         glutils.callback(self._loop)
 
     # ----- random -----
-    def noise(self, *args):
+    def noise(self, x, y=0, z=0):
         ''' Perlin noise '''
 
-        if 1 <= len(args) <= 4:
-            v = getattr(noise_module, 'pnoise{}'.format(len(args)))(*args)
-            return (v + 1) / 2
-        raise ValueError('noise() must have one to four arguments')
+        return (noise_module.pnoise3(x, y, z) + 1)/2
 
     # ----- events -----
     def recent_key(self):
@@ -164,6 +152,10 @@ class Condor:
 
     def mouse_y(self):
         return self.events.mouse_y
+
+    # ----- curves -----
+    def bezier(self, *args):
+        glutils.bezier(args)
 
 # Expose functions:
 c = Condor()

@@ -2,6 +2,8 @@
 
 # TODO - eventually remove this file
 
+import numpy as np
+
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
@@ -78,43 +80,95 @@ def rect_mode_convert(x, y, w, h):
                 style.rect_mode))
     return x, y, w, h
 
-def rect_fill(x, y, w, h):
-    x, y, w, h = rect_mode_convert(x, y, w, h)
-    glRectf(x, y, x + w, y + h)
 
-def rect_stroke(x, y, w, h):
-    # TODO - change to ellipse_stroke algorithm
-    x, y, w, h = rect_mode_convert(x, y, w, h)
-    lw = style.stroke_weight / 2
+def rect(x, y, w, h):
+    if style.fill:
+        style.re_fill()
+        x, y, w, h = rect_mode_convert(x, y, w, h)
+        glRectf(x, y, x + w, y + h)
 
-    glBegin(GL_LINES)
-    glVertex2f(x - lw, y)
-    glVertex2f(x + w + lw, y)
+    if style.stroke:
+        style.re_stroke()
 
-    glVertex2f(x + w, y - lw)
-    glVertex2f(x + w, y + h + lw)
+        # TODO - change to ellipse_stroke algorithm?
+        x, y, w, h = rect_mode_convert(x, y, w, h)
+        lw = style.stroke_weight / 2
 
-    glVertex2f(x + w + lw, y + h)
-    glVertex2f(x - lw, y + h)
+        glBegin(GL_LINES)
+        glVertex2f(x - lw, y)
+        glVertex2f(x + w + lw, y)
 
-    glVertex2f(x, y + h + lw)
-    glVertex2f(x, y - lw)
-    glEnd()
+        glVertex2f(x + w, y - lw)
+        glVertex2f(x + w, y + h + lw)
 
-def ellipse_fill(x, y, a, b):
-    glBegin(GL_POLYGON)
-    for theta in (theta/detail * 2 * pi for theta in range(detail + 1)):
-        glVertex2f(a * cos(theta) + x, b * sin(theta) + y)
-    glEnd()
+        glVertex2f(x + w + lw, y + h)
+        glVertex2f(x - lw, y + h)
 
-def ellipse_stroke(x, y, a, b):
-    w  = style.stroke_weight / 2
-    o_a, o_b = a + w, b + w
-    i_a, i_b = a - w, b - w
-    glBegin(GL_TRIANGLE_STRIP)
-    for theta in (theta/detail * 2 * pi for theta in range(detail + 1)):
-        glVertex2f(o_a * cos(theta) + x, o_b * sin(theta) + y)
-        glVertex2f(i_a * cos(theta) + x, i_b * sin(theta) + y)
+        glVertex2f(x, y + h + lw)
+        glVertex2f(x, y - lw)
+        glEnd()
 
-    glVertex2f(o_a + x, y)
-    glEnd()
+def ellipse(x, y, a, b):
+    if style.fill:
+        style.re_fill()
+
+        glBegin(GL_POLYGON)
+        for theta in (theta/detail * 2 * pi for theta in range(detail + 1)):
+            glVertex2f(a * cos(theta) + x, b * sin(theta) + y)
+        glEnd()
+
+    if style.stroke:
+        style.re_stroke()
+
+        w  = style.stroke_weight / 2
+        o_a, o_b = a + w, b + w
+        i_a, i_b = a - w, b - w
+        glBegin(GL_TRIANGLE_STRIP)
+        for theta in (theta/detail * 2 * pi for theta in range(detail + 1)):
+            glVertex2f(o_a * cos(theta) + x, o_b * sin(theta) + y)
+            glVertex2f(i_a * cos(theta) + x, i_b * sin(theta) + y)
+
+        glVertex2f(o_a + x, y)
+        glEnd()
+
+curve_detail = 20
+def bezier(points):
+    a, b, c, d = map(np.matrix, points)
+
+    # bezier curve
+    f = lambda t: ( a * (1 - t) ** 3 +
+                    b * 3 * t * (1 - t) ** 2 +
+                    c * 3 * t ** 2 * (1 - t) +
+                    d * t ** 3)
+
+    # bezier derivative
+    df = lambda t: (3 * (b - a) * (1 - t) ** 2 +
+                    6 * (c - b) * (1 - t) * t +
+                    3 * (d - c) * t ** 2)
+
+    if style.fill:
+        style.re_fill()
+        glBegin(GL_POLYGON)
+        for i in range(0, curve_detail + 1):
+            t = i/curve_detail
+            x, y = f(t).tolist()[0]
+            glVertex2f(x, y)
+        glEnd()
+
+    if style.stroke:
+        style.re_stroke()
+        glBegin(GL_TRIANGLE_STRIP)
+        for i in range(0, curve_detail + 1):
+            t = i/curve_detail
+            x, y = f(t).tolist()[0]
+            tangent = df(t).tolist()[0]
+            ortho1 = np.matrix((-tangent[1], tangent[0]))
+            ortho2 = -ortho1
+
+            # normalize
+            n = np.linalg.norm(ortho1) / (style.stroke_weight / 2)
+            ortho1 /= n
+            ortho2 /= n
+            glVertex2f(ortho1[0,0] + x, ortho1[0,1] + y)
+            glVertex2f(ortho2[0,0] + x, ortho2[0,1] + y)
+        glEnd()
