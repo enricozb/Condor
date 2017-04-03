@@ -52,24 +52,24 @@ class Style:
         if None in (g, b) and g != b:
             raise TypeError('color() must have 1 argument or 3 arguments')
 
-        # If r was the only argument passed in
+        # If r was the only argument passed in, use grayscale
         elif None in (g, b):
             if type(r) is float:
                 if r < 0 or r > 1:
                     raise ValueError(
                         'color() float values must be in the range [0, 1]')
-                v = r, r, r
+                return r, r, r
             elif type(r) is int:
                 if r < 0 or r > 255:
                     raise ValueError(
                         'color() integer values must be in range [0, 255]')
                 r /= 255
-                v = r, r, r
+                return r, r, r
             else:
                 raise TypeError('color() arguments must be floats or integers.')
 
         # If r, g, and b were all passed in
-        elif {type(r), type(g), type(b)} not in ({int}, {float}):
+        elif {type(x) for x in (r, g, b) if x != 0} not in ({int}, {float}):
             raise TypeError(
                 'color() arguments must be all floats or all integers.')
 
@@ -91,7 +91,7 @@ class Style:
         self.fill = self.color(*c)
 
     def no_fill(self):
-        self.fill = None
+        self.fill = 0
 
     def re_fill(self):
         glColor3f(*self.fill)
@@ -101,7 +101,7 @@ class Style:
         self.stroke = self.color(*c)
 
     def no_stroke(self):
-        self.stroke = None
+        self.stroke = 0
 
     def set_stroke_weight(self, w):
         self.stroke_weight = w

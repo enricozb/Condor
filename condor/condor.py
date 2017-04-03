@@ -106,7 +106,6 @@ class Condor:
         Draws a rectangle.
         Arguments must be floats or integers.
         '''
-
         glutils.rect(a, b, c, d)
 
     def ellipse(self, x, y, a, b):
@@ -114,8 +113,21 @@ class Condor:
         Draws an ellipse.
         Arguments must be floats or integers.
         '''
-
         glutils.ellipse(x, y, a, b)
+
+    def quad(self, *points):
+        '''
+        Draws a quadrilateral.
+        Arguments must be floats or integers.
+        '''
+        glutils.quad(points)
+
+    def line(self, a, b, c, d):
+        '''
+        Draws a line from (a, b) to (c, d). Uses stroke property, not fill.
+        Arguments must be floats or integers.
+        '''
+        glutils.line(a, b, c, d)
 
     # ----- entry point -----
     def begin(self, *funcs):
@@ -140,7 +152,6 @@ class Condor:
     # ----- random -----
     def noise(self, x, y=0, z=0):
         ''' Perlin noise '''
-
         return (noise_module.pnoise3(x, y, z) + 1)/2
 
     # ----- events -----

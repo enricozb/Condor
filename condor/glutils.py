@@ -94,19 +94,10 @@ def rect(x, y, w, h):
         x, y, w, h = rect_mode_convert(x, y, w, h)
         lw = style.stroke_weight / 2
 
-        glBegin(GL_LINES)
-        glVertex2f(x - lw, y)
-        glVertex2f(x + w + lw, y)
-
-        glVertex2f(x + w, y - lw)
-        glVertex2f(x + w, y + h + lw)
-
-        glVertex2f(x + w + lw, y + h)
-        glVertex2f(x - lw, y + h)
-
-        glVertex2f(x, y + h + lw)
-        glVertex2f(x, y - lw)
-        glEnd()
+        glRectf(x - lw, y - lw, x + lw, y + h + lw)
+        glRectf(x - lw, y - lw, x + w + lw, y + lw)
+        glRectf(x - lw, y + h - lw, x + w + lw, y + h + lw)
+        glRectf(x + w - lw, y - lw, x + w + lw, y + h + lw)
 
 def ellipse(x, y, a, b):
     if style.fill:
@@ -129,6 +120,39 @@ def ellipse(x, y, a, b):
             glVertex2f(i_a * cos(theta) + x, i_b * sin(theta) + y)
 
         glVertex2f(o_a + x, y)
+        glEnd()
+
+def quad(points):
+    a, b, c, d = points
+    if style.fill:
+        style.re_fill()
+        glBegin(GL_TRIANGLE_STRIP)
+        glVertex2f(*a)
+        glVertex2f(*b)
+        glVertex2f(*d)
+        glVertex2f(*c)
+        glEnd()
+
+    if style.stroke:
+        style.re_stroke()
+        glBegin(GL_TRIANGLE_STRIP)
+
+        glEnd()
+
+def line(a, b, c, d):
+    if style.stroke:
+        style.re_stroke()
+        v1 = c - a
+        v2 = d - b
+
+        norm = np.sqrt(v1 ** 2 + v2 ** 2) / (style.stroke_weight / 2)
+        v1 /= norm
+        v2 /= norm
+        glBegin(GL_TRIANGLE_STRIP)
+        glVertex2f(a + v2, b - v1)
+        glVertex2f(a - v2, b + v1)
+        glVertex2f(c + v2, d - v1)
+        glVertex2f(c - v2, d + v1)
         glEnd()
 
 curve_detail = 20
@@ -165,7 +189,6 @@ def bezier(points):
             ortho1 = np.matrix((-tangent[1], tangent[0]))
             ortho2 = -ortho1
 
-            # normalize
             n = np.linalg.norm(ortho1) / (style.stroke_weight / 2)
             ortho1 /= n
             ortho2 /= n
