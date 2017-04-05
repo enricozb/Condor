@@ -86,7 +86,7 @@ def rect(x, y, w, h):
         x, y, w, h = rect_mode_convert(x, y, w, h)
         glRectf(x, y, x + w, y + h)
 
-    if style.stroke:
+    if style.stroke_weight:
         style.re_stroke()
 
         # TODO - change to ellipse_stroke algorithm?
@@ -107,7 +107,7 @@ def ellipse(x, y, a, b):
             glVertex2f(a * cos(theta) + x, b * sin(theta) + y)
         glEnd()
 
-    if style.stroke:
+    if style.stroke_weight:
         style.re_stroke()
 
         w  = style.stroke_weight / 2
@@ -132,14 +132,14 @@ def quad(points):
         glVertex2f(*c)
         glEnd()
 
-    if style.stroke:
+    if style.stroke_weight:
         style.re_stroke()
         glBegin(GL_TRIANGLE_STRIP)
 
         glEnd()
 
 def line(a, b, c, d):
-    if style.stroke:
+    if style.stroke_weight:
         style.re_stroke()
         v1 = c - a
         v2 = d - b
@@ -178,7 +178,7 @@ def bezier(points):
             glVertex2f(x, y)
         glEnd()
 
-    if style.stroke:
+    if style.stroke_weight:
         style.re_stroke()
         glBegin(GL_TRIANGLE_STRIP)
         for i in range(0, curve_detail + 1):
