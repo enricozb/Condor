@@ -8,7 +8,6 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from condor.style import *
-from condor.profiler import timing
 
 from math import pi, sin, cos
 

@@ -1,3 +1,5 @@
+import copy
+
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
@@ -25,6 +27,10 @@ class Style:
         ''' will refresh something '''
         pass
 
+    def copy(self):
+        ''' returns a 'deep' copy of this object '''
+        return copy.copy(self)
+
     # ----- color -----
     def _convert_color(self, r, g, b):
         '''
@@ -47,6 +53,7 @@ class Style:
         '''
 
         # TODO - Allow 0 to be considered float or integer
+        # I believe this ^ is done already, no tests.
 
         # Ensure that if either g or b is None, both are
         if None in (g, b) and g != b:
@@ -101,16 +108,13 @@ class Style:
         self.stroke = self.color(*c)
 
     def no_stroke(self):
-        self.stroke = 0
+        self.stroke_weight = 0
 
     def set_stroke_weight(self, w):
         self.stroke_weight = w
 
     def re_stroke(self):
         glColor3f(*self.stroke)
-
-        # TODO - remove this dependency
-        glLineWidth(self.stroke_weight)
 
     # ----- shape modes -----
     def set_rect_mode(self, mode):

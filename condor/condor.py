@@ -15,10 +15,15 @@ class Condor:
     def __init__(self):
         self.looping = True
         self.style = style.Style()
+        # self.styles = []
         self.events = events.Events(self)
         self._frame_count = 0
 
         glutils.set_style(self.style)
+
+    # should only be used during condor development
+    def members(self):
+        return self
 
     # ----- hidden functions -----
     def _dummy_function(self, *args, **kwargs):
@@ -74,6 +79,15 @@ class Condor:
 
     def loop(self):
         self.looping = True
+
+    def push_style(self):
+        self.styles.append(self.style)
+        self.style = self.style.copy()
+        glutils.set_style(self.style)
+
+    def pop_style(self):
+        self.style = self.styles.pop()
+        glutils.set_style(self.style)
 
     # ----- color -----
     def background(self, r, g=None, b=None):
