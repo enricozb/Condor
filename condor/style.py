@@ -76,21 +76,27 @@ class Style:
                 raise TypeError('color() arguments must be floats or integers.')
 
         # If r, g, and b were all passed in
-        elif {type(x) for x in (r, g, b) if x != 0} not in ({int}, {float}):
-            raise TypeError(
-                'color() arguments must be all floats or all integers.')
-
-        elif type(r) is int:
+        arg_type = {type(x) for x in (r, g, b) if x != 0}
+        if arg_type == {int}:
             if not (0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255):
                 raise ValueError(
                     'color() integer values must be in range [0, 255]')
             v = r / 255, g / 255, b / 255
 
-        elif type(r) is float:
+        elif arg_type == {float}:
             if not (0 <= r <= 1 and 0 <= g <= 1 and 0 <= b <= 1):
                 raise ValueError(
                     'color() float values must be in range [0, 1]')
             v = r, g, b
+
+        elif not arg_type:
+            # if arguments are all 0's
+            return 0, 0, 0
+
+        else:
+            raise TypeError(
+                'color() arguments must be all floats or all integers.')
+
         return self._convert_color(*v)
 
     # ----- fill -----

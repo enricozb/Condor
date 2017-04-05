@@ -15,7 +15,7 @@ class Condor:
     def __init__(self):
         self.looping = True
         self.style = style.Style()
-        # self.styles = []
+        self.styles = []
         self.events = events.Events(self)
         self._frame_count = 0
 
