@@ -13,7 +13,7 @@ the first approach,
 from condor import *
 
 def setup():
-    global s_x, s_y
+    global scale_x, scale_y
     size(500, 500)
     color_mode('hsv')
     no_stroke()
