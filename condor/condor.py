@@ -18,6 +18,7 @@ class Condor:
         self.styles = []
         self.events = events.Events(self)
         self._frame_count = 0
+        self._redraw = 0
 
         glutils.set_style(self.style)
 
@@ -32,11 +33,14 @@ class Condor:
         '''
 
     def _loop(self):
-        if self.looping:
+        # should always call draw() at least once.
+        if self.looping or self._frame_count == 0 or self._redraw > 0:
             self._before_draw()
             self.draw()
             glutSwapBuffers()
             self._frame_count += 1
+            if self._redraw > 0:
+                self._redraw -= 1
         glutReshapeWindow(self._width, self._height)
 
     def _before_draw(self):
@@ -54,6 +58,10 @@ class Condor:
         for func in funcs:
             if func.__name__ in allowed_funcs:
                 self.__dict__[func.__name__] = func
+
+    # ----- image -----
+    def save_frame(self, filename):
+        glutils.save_frame(self, filename)
 
     # ----- properties -----
     def frame_count(self):
@@ -79,6 +87,9 @@ class Condor:
 
     def loop(self):
         self.looping = True
+
+    def redraw(self):
+        self._redraw += 1
 
     def push_style(self):
         self.styles.append(self.style)

@@ -11,6 +11,8 @@ from condor.style import *
 
 from math import pi, sin, cos
 
+from PIL import Image
+
 # TODO - move detail to style.py and make configurable
 detail = 20
 style = None
@@ -79,6 +81,16 @@ def rect_mode_convert(x, y, w, h):
                 style.rect_mode))
     return x, y, w, h
 
+def save_frame(self, filename):
+    glReadBuffer(GL_FRONT)
+    pixels = glReadPixels(0,0, self._width, self._height, GL_RGB,
+                          GL_UNSIGNED_BYTE)
+    image = Image.frombytes('RGB', (self._width, self._height), pixels)
+    image = image.transpose(Image.FLIP_TOP_BOTTOM)
+    split = list(filter(None, filename.split('#')))
+    pad = len(filename) - len(''.join(split))
+    filename = split[0] + str(self._frame_count).zfill(pad) + split[1]
+    image.save(filename, compress_level=0, quality=95)
 
 def rect(x, y, w, h):
     if style.fill:
