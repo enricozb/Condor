@@ -13,12 +13,18 @@ from OpenGL.GLU import *
 
 class Condor:
     def __init__(self):
-        self.looping = True
         self.style = style.Style()
         self.styles = []
         self.events = events.Events(self)
+
+        self._looping = True
         self._frame_count = 0
         self._redraw = 0
+        self._noise_params = {
+            'seed' : 0,
+            'octaves' : 4,
+            'persistence' : 0.5,
+        }
 
         glutils.set_style(self.style)
 
@@ -34,7 +40,7 @@ class Condor:
 
     def _loop(self):
         # should always call draw() at least once.
-        if self.looping or self._frame_count == 0 or self._redraw > 0:
+        if self._looping or self._frame_count == 0 or self._redraw > 0:
             self._before_draw()
             self.draw()
             glutSwapBuffers()
@@ -83,10 +89,10 @@ class Condor:
         self.events.setup()
 
     def no_loop(self):
-        self.looping = False
+        self._looping = False
 
     def loop(self):
-        self.looping = True
+        self._looping = True
 
     def redraw(self):
         self._redraw += 1
@@ -164,6 +170,8 @@ class Condor:
         '''
         if not funcs:
             import sys, inspect
+
+            # TODO - dynamic lookup of module
             importer = sys.modules['__main__']
             funcs = inspect.getmembers(importer, inspect.isfunction)
             funcs = map(lambda x: x[1], funcs)
@@ -177,7 +185,19 @@ class Condor:
     # ----- random -----
     def noise(self, x, y=0, z=0):
         ''' Perlin noise '''
-        return (noise_module.pnoise3(x, y, z) + 1)/2
+        seed = self._noise_params['seed']
+        x += seed
+        y += seed
+        z += seed
+        return (noise_module.pnoise3(x, y, z, octaves=4) + 1)/2
+
+    def noise_params(self, octaves, persistence):
+        self._noise_params['octaves'] = octaves
+        self._noise_params['persistence'] = persistence
+
+    def noise_seed(self, seed):
+        ''' Seed perlin noise by shifting the coordinates by seed '''
+        self._noise_params['seed'] = seed
 
     # ----- events -----
     def recent_key(self):
