@@ -18,20 +18,17 @@ def setup():
     color_mode('hsv')
     no_stroke()
 
-    s_x = width()/r
-    s_y = height()/r
+    scale_x = width()/r
+    scale_y = height()/r
 
 r = 50
 def draw():
     background(35)
-
     for x in range(r):
         for y in range(r):
             n = noise(x/r * 5, y/r * 5, frame_count()/50)
-            n = min(1.5 * n, 1.0)
             fill(n, 1.0, 1.0)
-            n = 1 - n
-            rect(x * s_x, y * s_y, n * 6 + 1, n * 6 + 1)
+            rect(x * scale_x, y * scale_y, n * 6, n * 6)
 
 begin()
 ```
