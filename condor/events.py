@@ -18,8 +18,8 @@ class Events:
 
         # 0 if button is pressed, 1 if not pressed
         self.buttons = defaultdict(lambda: 1)
-        self.mouse_x = None
-        self.mouse_y = None
+        self.mouse_x = 0
+        self.mouse_y = 0
         self.recent_key = None
 
     def call_func(self, func, kwargs):
@@ -38,6 +38,10 @@ class Events:
         glutKeyboardFunc(self.key_pressed_handler)
         glutKeyboardUpFunc(self.key_released_handler)
 
+    def mouse(self, x, y):
+        self.mouse_x = x
+        self.mouse_y = self.condor._width - y
+
     def is_button_pressed(self, button):
         return not bool(self.buttons[button])
 
@@ -50,13 +54,11 @@ class Events:
         self.call_func(self.condor.key_released, args)
 
     def mouse_moved_handler(self, x, y):
-        self.mouse_x = x
-        self.mouse_y = y
+        self.mouse(x, y)
         self.condor.mouse_moved()
 
     def mouse_dragged_handler(self, x, y):
-        self.mouse_x = x
-        self.mouse_y = y
+        self.mouse(x, y)
         self.condor.mouse_dragged()
 
     def mouse_clicked_handler(self, button, state, x, y):
@@ -76,8 +78,7 @@ class Events:
                 1 - released
         '''
         self.buttons[button] = state
-        self.mouse_x = x
-        self.mouse_y = y
+        self.mouse(x, y)
 
         if button == 3 or button == 4:
             self.call_func(self.condor.mouse_wheeled,

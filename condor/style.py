@@ -23,9 +23,8 @@ class Style:
 
         self.color_mode = 'rgb'
 
-    def refresh(self):
-        ''' will refresh something '''
-        pass
+        self.detail = 20
+        self.curve_detail = 20
 
     def copy(self):
         ''' returns a 'deep' copy of this object '''
@@ -133,3 +132,11 @@ class Style:
     # TODO
     def set_color_mode(self, mode):
         self.color_mode = mode
+
+    # ----- detail -----
+    def set_detail(self, detail):
+        self.detail = detail
+
+    def set_curve_detail(self, curve_detail):
+        self.curve_detail = curve_detail
+

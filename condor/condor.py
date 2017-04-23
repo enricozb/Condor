@@ -1,8 +1,9 @@
 # TODO - change glutils to modern openGL
 #      - remove all OpenGL calls from condor.py
 
-import condor.glutils as glutils
 import condor.events as events
+import condor.glutil as glutil
+import condor.profile as profile
 import condor.style as style
 
 import noise as noise_module
@@ -16,17 +17,18 @@ class Condor:
         self.style = style.Style()
         self.styles = []
         self.events = events.Events(self)
+        self.glutil = glutil.GLUtil(self)
 
         self._looping = True
         self._frame_count = 0
+        self._frame_rate = 60
+        self._actual_frame_rate = 0
         self._redraw = 0
         self._noise_params = {
             'seed' : 0,
             'octaves' : 4,
             'persistence' : 0.5,
         }
-
-        glutils.set_style(self.style)
 
     # should only be used during condor development
     def members(self):
@@ -39,21 +41,17 @@ class Condor:
         '''
 
     def _loop(self):
-        # should always call draw() at least once.
+        '''
+        The main loop which makes call to the user's draw function.
+        Notice the users draw function is always called at least once,
+        as the first frame must be rendered.
+        '''
         if self._looping or self._frame_count == 0 or self._redraw > 0:
-            self._before_draw()
-            self.draw()
-            glutSwapBuffers()
+            self._actual_frame_rate = 1/profile.time(self.glutil.draw)
             self._frame_count += 1
             if self._redraw > 0:
                 self._redraw -= 1
         glutReshapeWindow(self._width, self._height)
-
-    def _before_draw(self):
-        glutils.prepare_2d(self._width, self._height)
-
-    def _refresh_style(self):
-        self.style.refresh()
 
     def _setup_funcs(self, funcs):
         for func_name in events.handlers:
@@ -67,11 +65,16 @@ class Condor:
 
     # ----- image -----
     def save_frame(self, filename):
-        glutils.save_frame(self, filename)
+        self.glutil.save_frame(filename)
 
     # ----- properties -----
     def frame_count(self):
         return self._frame_count
+
+    def frame_rate(self, fps=None):
+        if fps is None:
+            return self._actual_frame_rate
+        self._frame_rate = fps
 
     def width(self):
         return self._width
@@ -83,7 +86,7 @@ class Condor:
     def size(self, width, height):
         self._width = width
         self._height = height
-        glutils.init_window('condor', self._width, self._height)
+        self.glutil.init_window('condor')
 
         # TODO - move this call elsewhere
         self.events.setup()
@@ -100,15 +103,13 @@ class Condor:
     def push_style(self):
         self.styles.append(self.style)
         self.style = self.style.copy()
-        glutils.set_style(self.style)
 
     def pop_style(self):
         self.style = self.styles.pop()
-        glutils.set_style(self.style)
 
     # ----- color -----
     def background(self, r, g=None, b=None):
-        glutils.clear_color(self.style.color(r, g, b))
+        self.glutil.background(self.style.color(r, g, b))
 
     def fill(self, r, g=None, b=None):
         self.style.set_fill((r, g, b))
@@ -122,8 +123,8 @@ class Condor:
     def no_stroke(self):
         self.style.no_stroke()
 
-    def stroke_weight(self, w):
-        self.style.set_stroke_weight(w)
+    def stroke_weight(self, weight):
+        self.style.set_stroke_weight(weight)
 
     def rect_mode(self, mode):
         self.style.set_rect_mode(mode)
@@ -131,34 +132,41 @@ class Condor:
     def color_mode(self, mode):
         self.style.set_color_mode(mode)
 
+    def detail(self, detail):
+        self.style.set_detail(detail)
+
+    def curve_detail(self, curve_detail):
+        self.style.set_curve_detail(curve_detail)
+
     # ----- shapes -----
     def rect(self, a, b, c, d):
         '''
         Draws a rectangle.
         Arguments must be floats or integers.
         '''
-        glutils.rect(a, b, c, d)
+        self.glutil.rect(a, b, c, d)
 
     def ellipse(self, x, y, a, b):
         '''
         Draws an ellipse.
         Arguments must be floats or integers.
         '''
-        glutils.ellipse(x, y, a, b)
+        self.glutil.ellipse(x, y, a, b)
+
 
     def quad(self, *points):
         '''
         Draws a quadrilateral.
         Arguments must be floats or integers.
         '''
-        glutils.quad(points)
+        self.glutil.quad(points)
 
     def line(self, a, b, c, d):
         '''
         Draws a line from (a, b) to (c, d). Uses stroke property, not fill.
         Arguments must be floats or integers.
         '''
-        glutils.line(a, b, c, d)
+        self.glutil.line(a, b, c, d)
 
     # ----- entry point -----
     def begin(self, *funcs):
@@ -180,7 +188,7 @@ class Condor:
 
         self.setup()
         glutSwapBuffers()
-        glutils.callback(self._loop)
+        self.glutil.begin(self._loop)
 
     # ----- random -----
     def noise(self, x, y=0, z=0):
@@ -211,7 +219,7 @@ class Condor:
 
     # ----- curves -----
     def bezier(self, *args):
-        glutils.bezier(args)
+        self.glutil.bezier(args)
 
 # Expose functions:
 c = Condor()
