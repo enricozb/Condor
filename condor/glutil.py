@@ -122,7 +122,7 @@ class GLUtil:
             self.condor.style.re_fill()
 
             glBegin(GL_POLYGON)
-            for theta in (theta/detail * 2 * pi
+            for theta in (theta/self.condor.style.detail * 2 * pi
                           for theta in range(self.condor.style.detail + 1)):
                 glVertex2f(a * cos(theta) + x, b * sin(theta) + y)
             glEnd()
@@ -134,7 +134,7 @@ class GLUtil:
             o_a, o_b = a + w, b + w
             i_a, i_b = a - w, b - w
             glBegin(GL_TRIANGLE_STRIP)
-            for theta in (theta/detail * 2 * pi
+            for theta in (theta/self.condor.style.detail * 2 * pi
                           for theta in range(self.condor.style.detail + 1)):
                 glVertex2f(o_a * cos(theta) + x, o_b * sin(theta) + y)
                 glVertex2f(i_a * cos(theta) + x, i_b * sin(theta) + y)

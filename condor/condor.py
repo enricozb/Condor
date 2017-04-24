@@ -217,6 +217,9 @@ class Condor:
     def mouse_y(self):
         return self.events.mouse_y
 
+    def mouse_down(self, *buttons):
+        return self.events.buttons_down(buttons)
+
     # ----- curves -----
     def bezier(self, *args):
         self.glutil.bezier(args)

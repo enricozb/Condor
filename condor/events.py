@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 from inspect import signature
 
 from OpenGL.GLUT import *
@@ -17,10 +15,19 @@ class Events:
         self.condor = condor_instance
 
         # 0 if button is pressed, 1 if not pressed
-        self.buttons = defaultdict(lambda: 1)
+        self.buttons = [1] * 5
         self.mouse_x = 0
         self.mouse_y = 0
         self.recent_key = None
+
+    def _convert_button(self, button):
+        if button == 'left':
+            return 0
+        if button == 'wheel':
+            return 1
+        if button == 'right':
+            return 2
+        raise ValueError('Invalid button {}'.format(button))
 
     def call_func(self, func, kwargs):
         kwargs = {x : y for x, y in kwargs.items()
@@ -42,8 +49,10 @@ class Events:
         self.mouse_x = x
         self.mouse_y = self.condor._width - y
 
-    def is_button_pressed(self, button):
-        return not bool(self.buttons[button])
+    def buttons_down(self, buttons):
+        if not len(buttons):
+            return not all(self.buttons)
+        return not all(self.buttons[self._convert_button(x)] for x in buttons)
 
     def key_pressed_handler(self, *args):
         args = {k : v for k, v in zip(('key', 'x', 'y'), args)}
@@ -59,7 +68,7 @@ class Events:
 
     def mouse_dragged_handler(self, x, y):
         self.mouse(x, y)
-        self.condor.mouse_dragged()
+        self.call_func(self.condor.mouse_dragged, {'x': x, 'y': y})
 
     def mouse_clicked_handler(self, button, state, x, y):
         '''
