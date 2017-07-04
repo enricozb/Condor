@@ -10,6 +10,8 @@ handlers = [
             # key events
             'key_pressed', 'key_released']
 
+mouse_buttons = ['left', 'wheel', 'right']
+
 class Events:
     def __init__(self, condor_instance):
         self.condor = condor_instance
@@ -72,7 +74,7 @@ class Events:
 
     def mouse_clicked_handler(self, button, state, x, y):
         '''
-        Handles clicks and scrolls.
+        Handles presses/releases and scrolls.
 
         Arguments:
             button - the 'button' that was pressed/scrolled
@@ -88,6 +90,9 @@ class Events:
         '''
         self.buttons[button] = state
         self.mouse(x, y)
+
+        if 0 <= button <= 2:
+            button = mouse_buttons[button]
 
         if button == 3 or button == 4:
             self.call_func(self.condor.mouse_wheeled,

@@ -85,12 +85,12 @@ class GLUtil:
                 'glutils.style.rect_mode = {}, which is invalid'.format(
                     self.condor.style.rect_mode))
         return x, y, w, h
-    
+
     def save_frame(self, filename):
         glReadBuffer(GL_FRONT)
         pixels = glReadPixels(0,0, self.condor._width, self.condor._height,
                               GL_RGB, GL_UNSIGNED_BYTE)
-        image = Image.frombytes('RGB', 
+        image = Image.frombytes('RGB',
                                 (self.condor._width, self.condor._height),
                                 pixels)
         image = image.transpose(Image.FLIP_TOP_BOTTOM)
@@ -156,6 +156,25 @@ class GLUtil:
         if self.condor.style.stroke_weight:
             self.condor.style.re_stroke()
             glBegin(GL_TRIANGLE_STRIP)
+                        
+            glEnd()
+
+    def polygon(self, points):
+        if self.condor.style.fill:
+            self.condor.style.re_fill()
+            glBegin(GL_POLYGON)
+            for p in points:
+                glVertex2f(*p)
+            glEnd()
+
+        if self.condor.style.stroke:
+            self.condor.style.re_stroke()
+            glBegin(GL_TRIANGLE_STRIP)
+
+            a, b = points[-2:] 
+            for c in points:
+                
+                a, b = b, c
 
             glEnd()
 

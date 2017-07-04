@@ -1,0 +1,8 @@
+Downloaded glew
+    $ make
+    $ sudo make install
+    $ make clean
+
+Downloaded glfw3
+    $ sudo apt-get install libglfw3 libglfw3-dev
+

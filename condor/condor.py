@@ -47,7 +47,7 @@ class Condor:
         as the first frame must be rendered.
         '''
         if self._looping or self._frame_count == 0 or self._redraw > 0:
-            self._actual_frame_rate = 1/profile.time(self.glutil.draw)
+            self._actual_frame_rate = 1 / profile.time(self.glutil.draw)
             self._frame_count += 1
             if self._redraw > 0:
                 self._redraw -= 1
@@ -161,6 +161,13 @@ class Condor:
         '''
         self.glutil.quad(points)
 
+    def polygon(self, *points):
+        '''
+        Draws a polygon.
+        Arguments must be floats or integers.
+        '''
+        self.glutil.polygon(points)
+
     def line(self, a, b, c, d):
         '''
         Draws a line from (a, b) to (c, d). Uses stroke property, not fill.
@@ -177,11 +184,10 @@ class Condor:
         Arguments must at least contain setup and draw functions.
         '''
         if not funcs:
-            import sys, inspect
+            import __main__, inspect
 
             # TODO - dynamic lookup of module
-            importer = sys.modules['__main__']
-            funcs = inspect.getmembers(importer, inspect.isfunction)
+            funcs = inspect.getmembers(__main__, inspect.isfunction)
             funcs = map(lambda x: x[1], funcs)
 
         self._setup_funcs(funcs)
@@ -229,3 +235,4 @@ c = Condor()
 g = globals()
 for func in Condor.__dict__:
     g[func] = getattr(c, func)
+
